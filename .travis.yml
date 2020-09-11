@@ -1,0 +1,20 @@
+sudo: required
+services:
+    - docker
+before_install:
+    - docker build -t client-test -f ./client/Dockerfile.dev ./client
+script:
+    - docker run client-test npm test -- --watchAll=false --coverage
+
+after_success:
+    - docker build -t lionleo1374/multi-client ./client
+    - docker build -t lionleo1374/multi-worker ./worker
+    - docker build -t lionleo1374/multi-server ./server
+    - docker build -t lionleo1374/multi-nginx ./nginx
+    # Login to the docker cli
+    - echo "$DOCKER_PASSWORD" | docker login  -u "$DOCKER_ID" --password-stdin
+    # Push this images to docker hub 
+    - docker push lionleo1374/multi-clien 
+    - docker push lionleo1374/multi-worker 
+    - docker push lionleo1374/multi-nginx 
+    - docker push lionleo1374/multi-server 
